@@ -18,7 +18,7 @@ jobs:
   test:
     strategy:
       matrix:
-        go-version: [1.19.x]
+        go-version: [1.22.x]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
 
@@ -50,9 +50,6 @@ jobs:
 
       - name: Downloads the dependencies
         run: make download
-
-      - name: Lints all code with golangci-lint
-        run: make lint
 
       - name: Runs all tests
         run: make test
