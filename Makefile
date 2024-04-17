@@ -32,23 +32,9 @@ test-build: ## Tests whether the code compiles
 build: out/bin ## Builds all binaries
 
 GO_BUILD = mkdir -pv "$(@)" && go build -ldflags="-w -s" -o "$(@)" ./...
-.PHONY: out/bin
+.PHONY: out/bin test
 out/bin:
 	$(GO_BUILD)
-
-GOLANGCI_LINT = bin/golangci-lint-$(GOLANGCI_VERSION)
-$(GOLANGCI_LINT):
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | bash -s -- -b bin v$(GOLANGCI_VERSION)
-	@mv bin/golangci-lint "$(@)"
-
-lint: fmt $(GOLANGCI_LINT) download ## Lints all code with golangci-lint
-	@$(GOLANGCI_LINT) run
-
-lint-reports: out/lint.xml
-
-.PHONY: out/lint.xml
-out/lint.xml: $(GOLANGCI_LINT) out download
-	@$(GOLANGCI_LINT) run ./... --out-format checkstyle | tee "$(@)"
 
 test: ## Runs all tests
 	@go test $(ARGS) ./...
@@ -66,12 +52,12 @@ out/report.json: out
 	@go test -count 1 ./... -coverprofile=out/cover.out --json | tee "$(@)"
 
 clean: ## Cleans up everything
-	@rm -rf bin out 
+	@rm -rf bin out
 
 docker: ## Builds docker image
 	docker buildx build -t $(DOCKER_REPO):$(DOCKER_TAG) .
 
-ci: lint-reports test-reports ## Executes lint and test and generates reports
+
 
 help: ## Shows the help
 	@echo 'Usage: make <OPTIONS> ... <TARGETS>'
