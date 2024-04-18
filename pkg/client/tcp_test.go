@@ -25,9 +25,9 @@ func TestTcpClient(t *testing.T) {
 }
 
 func TestDialAndSend(t *testing.T) {
-	testServer := server.TcpServer(port)
+	testServer := server.NewTcpServer(port)
 	go testServer.Start()
-	testClient := client.TcpClient(port, username)
+	testClient := client.NewTcpClient(port, username)
 	if err := testClient.Connect(); err != nil {
 		t.Fatalf("error connecting to the server %v", err)
 	}

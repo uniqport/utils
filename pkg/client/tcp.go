@@ -9,20 +9,20 @@ import (
 	"net"
 )
 
-type tcpClient struct {
+type TcpClient struct {
 	con      net.Conn
 	Address  string
 	Username string
 }
 
-func TcpClient(address string, username string) *tcpClient {
-	return &tcpClient{
+func NewTcpClient(address string, username string) *TcpClient {
+	return &TcpClient{
 		Address:  address,
 		Username: username,
 	}
 }
 
-func (c *tcpClient) Connect() error {
+func (c *TcpClient) Connect() error {
 	con, err := net.Dial("tcp", ":3000")
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (c *tcpClient) Connect() error {
 	return nil
 }
 
-func (c *tcpClient) Send(msg string) error {
+func (c *TcpClient) Send(msg string) error {
 	if c.con == nil {
 		return errors.New("there is no connection")
 	}

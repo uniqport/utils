@@ -9,28 +9,34 @@ import (
 	"net"
 )
 
-type tcpMessage struct {
+type Server interface {
+	Start() error
+	acceptLoop()
+	handleConnection(net.Conn)
+}
+
+type TcpMessage struct {
 	// TODO: get from info from user type
 	from    string
 	payload []byte
 }
 
-type tcpServer struct {
+type TcpServer struct {
 	quitch   chan int
-	msgch    chan tcpMessage
+	msgch    chan TcpMessage
 	listener net.Listener
 	Address  string
 }
 
-func TcpServer(address string) *tcpServer {
-	return &tcpServer{
+func NewTcpServer(address string) *TcpServer {
+	return &TcpServer{
 		Address: address,
 		quitch:  make(chan int),
-		msgch:   make(chan tcpMessage),
+		msgch:   make(chan TcpMessage),
 	}
 }
 
-func (s *tcpServer) Start() error {
+func (s *TcpServer) Start() error {
 	ln, err := net.Listen("tcp", s.Address)
 	if err != nil {
 		return err
@@ -46,7 +52,7 @@ func (s *tcpServer) Start() error {
 	return nil
 }
 
-func (s *tcpServer) acceptLoop() {
+func (s *TcpServer) acceptLoop() {
 	for {
 		con, err := s.listener.Accept()
 		if err != nil {
@@ -60,7 +66,7 @@ func (s *tcpServer) acceptLoop() {
 	}
 }
 
-func (s *tcpServer) handleConnection(con net.Conn) {
+func (s *TcpServer) handleConnection(con net.Conn) {
 	defer con.Close()
 	var size int64
 	binary.Read(con, binary.LittleEndian, &size)
@@ -73,19 +79,20 @@ func (s *tcpServer) handleConnection(con net.Conn) {
 		}
 		fmt.Printf("recievd %d bytes over  \n", n)
 
-		s.msgch <- tcpMessage{
+		s.msgch <- TcpMessage{
 			payload: buf.Bytes(),
 			from:    con.RemoteAddr().String(),
 		}
 	}
 }
 
-func (s *tcpServer) HandleMessages() {
+func (s *TcpServer) HandleMessages() {
 	for msg := range s.msgch {
 		fmt.Printf("from: %s recieved: %s \n", msg.from, string(msg.payload))
 	}
 }
 
-func (s *tcpServer) Close() {
+// WARN: not sure if thats the way
+func (s *TcpServer) Close() {
 	s.quitch <- 0
 }

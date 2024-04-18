@@ -1,9 +1,9 @@
 package main
 
-import "github.com/uniqport/utils/pkg/server"
+import (
+	"fmt"
+)
 
 func main() {
-	server := server.TcpServer(":3000")
-	go server.HandleMessages()
-	server.Start()
+	fmt.Println("To run something creates tests, this project is meant for using it as a library")
 }
